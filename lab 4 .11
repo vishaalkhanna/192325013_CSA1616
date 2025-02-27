@@ -1,0 +1,34 @@
+# Given Strike Rates
+strike_rates <- c(100, 70, 60, 90, 90)
+
+# --- (a) Min-Max Normalization (0 to 1) ---
+min_val <- min(strike_rates)
+max_val <- max(strike_rates)
+min_max_norm <- (strike_rates - min_val) / (max_val - min_val)
+
+# --- (b) Z-Score Normalization ---
+mean_val <- mean(strike_rates)
+std_dev <- sd(strike_rates)
+z_score_norm <- (strike_rates - mean_val) / std_dev
+
+# --- (c) Z-Score Normalization using Mean Absolute Deviation (MAD) ---
+mad_val <- mean(abs(strike_rates - mean_val))
+z_score_mad_norm <- (strike_rates - mean_val) / mad_val
+
+# --- (d) Decimal Scaling Normalization ---
+max_digits <- ceiling(log10(max(abs(strike_rates))))
+decimal_scaling_norm <- strike_rates / (10^max_digits)
+
+# --- Print Results ---
+cat("Original Strike Rates:", strike_rates, "\n")
+cat("Min-Max Normalization:", min_max_norm, "\n")
+cat("Z-Score Normalization:", z_score_norm, "\n")
+cat("Z-Score (MAD) Normalization:", z_score_mad_norm, "\n")
+cat("Decimal Scaling Normalization:", decimal_scaling_norm, "\n")
+
+# --- (Optional) Plot Normalized Data ---
+par(mfrow = c(2,2))
+hist(min_max_norm, main="Min-Max Normalization", col="blue")
+hist(z_score_norm, main="Z-Score Normalization", col="red")
+hist(z_score_mad_norm, main="Z-Score (MAD) Normalization", col="green")
+hist(decimal_scaling_norm, main="Decimal Scaling Normalization", col="purple")

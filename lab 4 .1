@@ -1,0 +1,47 @@
+# Install required packages if not installed
+if(!require(ggplot2)) install.packages("ggplot2", dependencies=TRUE)
+if(!require(cluster)) install.packages("cluster", dependencies=TRUE)
+if(!require(factoextra)) install.packages("factoextra", dependencies=TRUE)
+
+# Load required libraries
+library(ggplot2)
+library(cluster)
+library(factoextra)
+
+# ---- Step 1: Load Dataset ----
+# Sample Customer Data
+customer_data <- data.frame(
+  CustomerID = c(1, 2, 3, 4, 5),
+  Gender = c("Male", "Male", "Female", "Female", "Female"),
+  Age = c(19, 21, 20, 23, 31),
+  Annual_Income = c(15, 16, 16, 16, 17), # in k$
+  Spending_Score = c(39, 81, 6, 77, 40)  # (1-100)
+)
+
+# ---- Step 2: Select Features for Clustering ----
+clustering_data <- customer_data[, c("Annual_Income", "Spending_Score")]
+
+# ---- Step 3: Find Optimal Number of Clusters (Elbow Method) ----
+set.seed(123)  # For reproducibility
+wcss <- vector()
+for (i in 1:10) {
+  kmeans_model <- kmeans(clustering_data, centers = i, nstart = 25)
+  wcss[i] <- kmeans_model$tot.withinss
+}
+
+# Plot Elbow Method
+plot(1:10, wcss, type = "b", pch = 19, col = "blue",
+     xlab = "Number of Clusters (k)", ylab = "WCSS (Within Cluster Sum of Squares)",
+     main = "Elbow Method for Optimal k")
+
+# ---- Step 4: Apply K-Means Clustering ----
+optimal_k <- 4  # Choose k based on the Elbow Method
+kmeans_model <- kmeans(clustering_data, centers = optimal_k, nstart = 25)
+
+# Add Cluster Labels to Data
+customer_data$Cluster <- as.factor(kmeans_model$cluster)
+
+# ---- Step 5: Visualize Clusters ----
+fviz_cluster(kmeans_model, data = clustering_data, geom = "point",
+             ellipse.type = "convex", palette = "jco", ggtheme = theme_minimal()) +
+  labs(title = "Customer Segmentation Using K-Means")

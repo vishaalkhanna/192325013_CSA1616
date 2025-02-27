@@ -1,0 +1,36 @@
+# Install and load necessary packages
+if(!require(arules)) install.packages("arules", dependencies=TRUE)
+if(!require(arulesViz)) install.packages("arulesViz", dependencies=TRUE)
+library(arules)
+library(arulesViz)
+
+# Create the transaction dataset
+transactions <- list(
+  c("a", "d", "e"),
+  c("a", "b", "c", "e"),
+  c("a", "b", "d", "e"),
+  c("a", "c", "d", "e"),
+  c("b", "c", "e"),
+  c("b", "d", "e"),
+  c("c", "d"),
+  c("a", "b", "c"),
+  c("a", "b", "e"),
+  c("a", "b", "e")
+)
+
+# Convert to transactions format
+trans <- as(transactions, "transactions")
+
+# Print summary of the transactions
+summary(trans)
+
+# **Apriori Algorithm**
+rules_apriori <- apriori(trans, parameter = list(supp = 0.3, conf = 0.5))
+inspect(rules_apriori)  # Display the generated rules
+
+# **FP-Growth Algorithm**
+frequent_itemsets <- eclat(trans, parameter = list(supp = 0.3))
+inspect(frequent_itemsets)  # Display frequent itemsets
+
+# Visualize association rules
+plot(rules_apriori, method = "graph", control = list(type = "items"))

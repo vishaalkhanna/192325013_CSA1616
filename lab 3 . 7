@@ -1,0 +1,37 @@
+# Install required packages if not installed
+if(!require(arules)) install.packages("arules", dependencies=TRUE)
+
+library(arules)
+
+# ---- Step 1: Load Data (Manually or from ARFF) ----
+transactions <- list(
+  c("Hot Dogs", "Buns", "Ketchup"),
+  c("Hot Dogs", "Buns"),
+  c("Hot Dogs", "Coke", "Chips"),
+  c("Chips", "Coke"),
+  c("Chips", "Ketchup"),
+  c("Hot Dogs", "Coke", "Chips")
+)
+
+# Convert to Transactions Format
+trans_data <- as(transactions, "transactions")
+
+# ---- Step 2: Apriori Algorithm ----
+apriori_rules <- apriori(trans_data, 
+                         parameter = list(support = 0.333, confidence = 0.6, minlen = 2))
+
+# Print Frequent Itemsets
+inspect(apriori_rules)
+
+# ---- Step 3: FP-Growth Algorithm ----
+if(!require(arulesSequences)) install.packages("arulesSequences", dependencies=TRUE)
+library(arulesSequences)
+
+fp_rules <- cspade(trans_data, parameter = list(support = 0.333))
+
+# Print FP-Growth Rules
+inspect(fp_rules)
+
+# ---- Step 4: Interpretation ----
+summary(apriori_rules)  # Summary of Apriori rules
+summary(fp_rules)       # Summary of FP-Growth rules

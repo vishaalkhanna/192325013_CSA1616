@@ -1,0 +1,43 @@
+# Install required packages if not installed
+if(!require(RWeka)) install.packages("RWeka", dependencies=TRUE)
+
+library(RWeka)
+
+# ---- Step 1: Load Dataset ----
+# Assume a categorical dataset like "iris" or a custom CSV file
+data(iris)  # Example dataset
+
+# Convert Species to categorical factor
+iris$Species <- as.factor(iris$Species)
+
+# Split Data into Training (70%) and Testing (30%)
+set.seed(123)
+train_idx <- sample(1:nrow(iris), 0.7 * nrow(iris))
+train_data <- iris[train_idx,]
+test_data <- iris[-train_idx,]
+
+# ---- Step 2: Rule-Based Classification (OneR Algorithm) ----
+OneR_model <- OneR(Species ~ ., data=train_data)
+OneR_pred <- predict(OneR_model, test_data)
+OneR_acc <- sum(OneR_pred == test_data$Species) / nrow(test_data) * 100
+
+# ---- Step 3: Decision Tree Classification (J48 Algorithm) ----
+J48_model <- J48(Species ~ ., data=train_data)
+J48_pred <- predict(J48_model, test_data)
+J48_acc <- sum(J48_pred == test_data$Species) / nrow(test_data) * 100
+
+# ---- Step 4: Compare Accuracy ----
+accuracy_df <- data.frame(Method=c("OneR (Rule-Based)", "J48 (Decision Tree)"),
+                          Accuracy=c(OneR_acc, J48_acc))
+
+print(accuracy_df)
+
+# ---- Step 5: Plot Accuracy Graph ----
+if(!require(ggplot2)) install.packages("ggplot2", dependencies=TRUE)
+library(ggplot2)
+
+ggplot(accuracy_df, aes(x=Method, y=Accuracy, fill=Method)) +
+  geom_bar(stat="identity", color="black") +
+  labs(title="Comparison of Rule-Based & Decision Tree Classification",
+       x="Classification Method", y="Accuracy (%)") +
+  theme_minimal()

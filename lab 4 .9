@@ -1,0 +1,60 @@
+# Install required packages if not installed
+install.packages("rpart")
+install.packages("rpart.plot")
+install.packages("caret")
+
+# Load required libraries
+library(rpart)
+library(rpart.plot)
+library(caret)
+
+# --- (a) Create Dataset ---
+data <- data.frame(
+  Height = c(185, 170, 190, 175, 160, 195, 180, 170, 185, 175),
+  Weight = c(75, 85, 90, 70, 60, 88, 82, 78, 95, 65),
+  Gender = as.factor(c("Male", "Male", "Male", "Female", "Female", "Male", "Male", "Male", "Male", "Female"))
+)
+
+# Split into training and testing datasets (80%-20% split)
+set.seed(123)
+trainIndex <- createDataPartition(data$Gender, p = 0.8, list = FALSE)
+trainData <- data[trainIndex, ]
+testData <- data[-trainIndex, ]
+
+# --- (b) Build Decision Tree Model ---
+tree_model <- rpart(Gender ~ Height + Weight, data = trainData, method = "class")
+
+# Plot the decision tree
+rpart.plot(tree_model, main = "Decision Tree for Gender Classification")
+
+# --- (c) Predict and Evaluate Model ---
+predictions <- predict(tree_model, testData, type = "class")
+
+# Confusion Matrix for Decision Tree
+conf_matrix_tree <- confusionMatrix(predictions, testData$Gender)
+print("Confusion Matrix for Decision Tree:")
+print(conf_matrix_tree)
+
+# --- Compare with Another Classifier (e.g., Naive Bayes) ---
+install.packages("e1071")
+library(e1071)
+
+nb_model <- naiveBayes(Gender ~ Height + Weight, data = trainData)
+nb_predictions <- predict(nb_model, testData)
+
+# Confusion Matrix for Naive Bayes
+conf_matrix_nb <- confusionMatrix(nb_predictions, testData$Gender)
+print("Confusion Matrix for Naive Bayes:")
+print(conf_matrix_nb)
+
+# --- Compare Accuracy ---
+accuracy_tree <- conf_matrix_tree$overall['Accuracy']
+accuracy_nb <- conf_matrix_nb$overall['Accuracy']
+
+print(paste("Decision Tree Accuracy:", round(accuracy_tree, 2)))
+print(paste("Naive Bayes Accuracy:", round(accuracy_nb, 2)))
+
+# Plotting the Confusion Matrices
+par(mfrow = c(1, 2))  # Side-by-side plots
+plot(table(predictions, testData$Gender), main = "Decision Tree Confusion Matrix")
+plot(table(nb_predictions, testData$Gender), main = "Naive Bayes Confusion Matrix")

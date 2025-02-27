@@ -1,0 +1,11 @@
+# Load dataset
+data(iris)
+
+# Convert Species to categorical variable
+iris$Species <- as.factor(iris$Species)
+
+# Split dataset into training (70%) and testing (30%)
+set.seed(123)  # Ensure reproducibility
+split <- createDataPartition(iris$Species, p=0.7, list=FALSE)
+train_data <- iris[split, ]
+test_data <- iris[-split, ]

@@ -1,0 +1,34 @@
+# Install required packages if not installed
+if(!require(RWeka)) install.packages("RWeka", dependencies=TRUE)
+if(!require(caret)) install.packages("caret", dependencies=TRUE)
+
+library(RWeka)
+library(caret)
+
+# ---- Step 1: Load the Dataset ----
+data("iris")  # Using the Iris dataset for categorical classification
+iris$Species <- as.factor(iris$Species)  # Ensure categorical target variable
+
+# ---- Step 2: Split Data into Training & Testing ----
+set.seed(123)
+trainIndex <- createDataPartition(iris$Species, p=0.7, list=FALSE)
+trainData <- iris[trainIndex, ]
+testData <- iris[-trainIndex, ]
+
+# ---- Step 3: Build Decision Tree Model ----
+tree_model <- J48(Species ~ ., data=trainData)  # J48 is WEKA's Decision Tree
+
+# Print the tree structure
+print(tree_model)
+
+# ---- Step 4: Predictions & Accuracy ----
+predictions <- predict(tree_model, testData)
+confusionMatrix(predictions, testData$Species)
+
+# ---- Step 5: Visualize Decision Tree ----
+plot(tree_model)
+
+# ---- Step 6: Logistic Regression for Comparison ----
+logistic_model <- multinom(Species ~ ., data=trainData)
+logistic_predictions <- predict(logistic_model, testData)
+confusionMatrix(logistic_predictions, testData$Species)

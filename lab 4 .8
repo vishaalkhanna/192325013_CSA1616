@@ -1,0 +1,46 @@
+# Install required packages if not installed
+install.packages("ggplot2")
+install.packages("stats")
+
+# Load libraries
+library(ggplot2)
+
+# Define the dataset (marks scored by a student)
+marks <- c(55, 60, 71, 63, 55, 65, 50, 55, 58, 59, 61, 63, 65, 67, 71, 72, 75)
+
+# --- (a) Equal-Frequency (Equi-Depth) Partitioning ---
+num_bins <- 3
+sorted_marks <- sort(marks)
+bin_size <- length(marks) / num_bins
+eq_freq_bins <- split(sorted_marks, ceiling(seq_along(sorted_marks) / bin_size))
+
+# Print Equal-Frequency Bins
+print("Equal-Frequency Bins:")
+print(eq_freq_bins)
+
+# --- (b) Equal-Width Partitioning ---
+min_val <- min(marks)
+max_val <- max(marks)
+bin_width <- (max_val - min_val) / num_bins
+eq_width_bins <- cut(marks, breaks = seq(min_val, max_val, by = bin_width), include.lowest = TRUE)
+
+# Print Equal-Width Bins
+print("Equal-Width Bins:")
+print(table(eq_width_bins))
+
+# --- (c) Clustering using K-Means ---
+set.seed(123)
+kmeans_result <- kmeans(marks, centers = num_bins)
+cluster_bins <- split(marks, kmeans_result$cluster)
+
+# Print Clustering Bins
+print("Clustering Bins:")
+print(cluster_bins)
+
+# --- Plot Histogram ---
+ggplot(data.frame(marks), aes(x = marks)) +
+  geom_histogram(bins = num_bins, fill = "steelblue", color = "black", alpha = 0.7) +
+  ggtitle("Histogram of Marks with 3 Bins") +
+  xlab("Marks") +
+  ylab("Frequency") +
+  theme_mi

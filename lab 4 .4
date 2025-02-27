@@ -1,0 +1,22 @@
+# Create a data frame for the given table
+persons <- c("Gopu", "Babu", "Baby", "Gopal", "Krishna", "Jai", "Dev", "Malini", "Hema", "Anu")
+vegetarian_status <- c("yes", "yes", "yes", "no", "yes", "no", "no", "yes", "yes", "yes")
+
+# Count the number of vegetarians
+num_vegetarians <- sum(vegetarian_status == "yes")
+
+# Count the number of non-vegetarians
+num_non_vegetarians <- sum(vegetarian_status == "no")
+
+# Print results
+cat("Total Vegetarians: ", num_vegetarians, "\n")
+cat("Total Non-Vegetarians: ", num_non_vegetarians, "\n")
+
+# Determine which group is greater
+if (num_vegetarians > num_non_vegetarians) {
+  cat("There are more vegetarians.\n")
+} else if (num_vegetarians < num_non_vegetarians) {
+  cat("There are more non-vegetarians.\n")
+} else {
+  cat("Both groups have equal numbers.\n")
+}

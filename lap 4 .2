@@ -1,0 +1,52 @@
+# Install required packages if not installed
+if(!require(ggplot2)) install.packages("ggplot2", dependencies=TRUE)
+if(!require(cluster)) install.packages("cluster", dependencies=TRUE)
+if(!require(factoextra)) install.packages("factoextra", dependencies=TRUE)
+
+# Load libraries
+library(ggplot2)
+library(cluster)
+library(factoextra)
+
+# ---- Step 1: Create and Save CSV Dataset ----
+employee_data <- data.frame(
+  EmployeeID = c(111, 222, 333, 444, 555, 666),
+  Gender = c("Male", "Male", "Female", "Female", "Female", "Male"),
+  Age = c(28, 25, 26, 25, 30, 29),
+  Salary = c(150000, 150000, 160000, 160000, 170000, 200000),
+  Credit = c(39, 27, 42, 40, 64, 72)
+)
+
+# Save dataset as CSV
+write.csv(employee_data, "employee_data.csv", row.names = FALSE)
+
+# ---- Step 2: Load CSV File ----
+data <- read.csv("employee_data.csv")
+
+# ---- Step 3: Select Features for Clustering ----
+clustering_data <- data[, c("Salary", "Credit")]
+
+# ---- Step 4: Determine Optimal Number of Clusters (Elbow Method) ----
+set.seed(123)
+wcss <- vector()
+for (i in 1:10) {
+  kmeans_model <- kmeans(clustering_data, centers = i, nstart = 25)
+  wcss[i] <- kmeans_model$tot.withinss
+}
+
+# Plot Elbow Method
+plot(1:10, wcss, type = "b", pch = 19, col = "blue",
+     xlab = "Number of Clusters (k)", ylab = "WCSS (Within Cluster Sum of Squares)",
+     main = "Elbow Method for Optimal k")
+
+# ---- Step 5: Apply K-Means Clustering ----
+optimal_k <- 3  # Choose k based on the Elbow Method
+kmeans_model <- kmeans(clustering_data, centers = optimal_k, nstart = 25)
+
+# Add Cluster Labels to Data
+data$Cluster <- as.factor(kmeans_model$cluster)
+
+# ---- Step 6: Visualize Clusters ----
+fviz_cluster(kmeans_model, data = clustering_data, geom = "point",
+             ellipse.type = "convex", palette = "jco", ggtheme = theme_minimal()) +
+  labs(title = "Employee Clustering Based on Salary & Credit Score")

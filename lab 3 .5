@@ -1,0 +1,43 @@
+# Install required libraries if not installed
+if(!require(arules)) install.packages("arules", dependencies=TRUE)
+if(!require(arulesViz)) install.packages("arulesViz", dependencies=TRUE)
+
+library(arules)
+library(arulesViz)
+
+# ---- Step 1: Create Transaction Dataset ----
+transactions <- list(
+  c("M", "O", "N", "K", "E", "Y"),
+  c("D", "O", "N", "K", "E", "Y"),
+  c("M", "A", "K", "E"),
+  c("M", "U", "C", "K", "Y"),
+  c("C", "O", "O", "K", "I", "E")
+)
+
+# Convert to transactions format
+trans <- as(transactions, "transactions")
+
+# Inspect dataset
+inspect(trans)
+
+# ---- Step 2: Apply Apriori Algorithm ----
+rules_apriori <- apriori(trans, 
+                         parameter = list(supp = 0.5, conf = 0.8, target="rules"))
+
+# Show discovered rules
+inspect(rules_apriori)
+
+# Visualizing top rules
+plot(rules_apriori, method="graph", control=list(type="items"))
+
+# ---- Step 3: Apply FP-Growth Algorithm ----
+rules_fp <- apriori(trans, 
+                    parameter = list(supp = 0.5, conf = 0.8, target="frequent itemsets"),
+                    control = list(verbose = TRUE))
+
+# Show frequent itemsets
+inspect(rules_fp)
+
+# Visualizing FP-Growth Tree
+itemFrequencyPlot(trans, topN=10, col="darkblue", main="Frequent Items")
+

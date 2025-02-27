@@ -1,0 +1,65 @@
+# Install required packages
+install.packages("rpart")
+install.packages("e1071")
+install.packages("caret")
+install.packages("ggplot2")
+
+# Load libraries
+library(rpart)   # Decision Tree
+library(e1071)   # SVM
+library(caret)   # For confusion matrix & F1-score
+library(ggplot2) # For plotting
+
+# Load the Diabetes Dataset (Assuming a CSV file "diabetes.csv")
+diabetes_data <- read.csv("diabetes.csv")
+
+# Convert target variable to factor (Assuming 'Outcome' is the target variable)
+diabetes_data$Outcome <- as.factor(diabetes_data$Outcome)
+
+# Split dataset into training (70%) and testing (30%)
+set.seed(123)
+train_index <- createDataPartition(diabetes_data$Outcome, p = 0.7, list = FALSE)
+train_data <- diabetes_data[train_index, ]
+test_data <- diabetes_data[-train_index, ]
+
+# --- Train Decision Tree Model ---
+dt_model <- rpart(Outcome ~ ., data = train_data, method = "class")
+dt_pred <- predict(dt_model, test_data, type = "class")
+
+# --- Train SVM Model ---
+svm_model <- svm(Outcome ~ ., data = train_data, kernel = "linear")
+svm_pred <- predict(svm_model, test_data)
+
+# --- Evaluate Models ---
+dt_conf_matrix <- confusionMatrix(dt_pred, test_data$Outcome)
+svm_conf_matrix <- confusionMatrix(svm_pred, test_data$Outcome)
+
+# Extract Accuracy and F1-score
+dt_accuracy <- dt_conf_matrix$overall["Accuracy"]
+svm_accuracy <- svm_conf_matrix$overall["Accuracy"]
+
+dt_f1 <- dt_conf_matrix$byClass["F1"]
+svm_f1 <- svm_conf_matrix$byClass["F1"]
+
+# --- Create Data for Plotting ---
+results <- data.frame(
+  Model = c("Decision Tree", "SVM"),
+  Accuracy = c(dt_accuracy, svm_accuracy),
+  F1_Score = c(dt_f1, svm_f1)
+)
+
+# --- Plot Accuracy and F1-score Comparison ---
+ggplot(results, aes(x = Model, y = Accuracy, fill = Model)) +
+  geom_bar(stat = "identity") +
+  ggtitle("Accuracy Comparison: Decision Tree vs SVM") +
+  ylab("Accuracy") +
+  theme_minimal()
+
+ggplot(results, aes(x = Model, y = F1_Score, fill = Model)) +
+  geom_bar(stat = "identity") +
+  ggtitle("F1-Score Comparison: Decision Tree vs SVM") +
+  ylab("F1 Score") +
+  theme_minimal()
+
+# Print results
+print(results)

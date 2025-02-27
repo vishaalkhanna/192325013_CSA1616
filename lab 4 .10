@@ -1,0 +1,52 @@
+# Install required packages if not installed
+install.packages("arules")
+install.packages("arulesViz")
+
+# Load required libraries
+library(arules)
+library(arulesViz)
+
+# --- (1) Prepare Transaction Data ---
+transactions <- list(
+  c("SONY", "BPL", "LG"),
+  c("BPL", "SAMSUNG"),
+  c("BPL", "ONIDA"),
+  c("SONY", "BPL", "SAMSUNG"),
+  c("SONY", "ONIDA"),
+  c("BPL", "ONIDA"),
+  c("SONY", "ONIDA"),
+  c("SONY", "BPL", "ONIDA", "LG"),
+  c("SONY", "BPL", "ONIDA")
+)
+
+# Convert into transaction format
+trans <- as(transactions, "transactions")
+
+# --- (2) Apriori Algorithm ---
+apriori_rules <- apriori(trans, parameter = list(support = 2/9, confidence = 0.5, target = "rules"))
+
+# Display Apriori rules
+print("Apriori Rules:")
+inspect(apriori_rules)
+
+# --- (3) FP-Growth Algorithm (Using eclat as alternative) ---
+fp_growth_rules <- eclat(trans, parameter = list(support = 2/9))
+
+# Display FP-Growth rules
+print("FP-Growth Rules:")
+inspect(fp_growth_rules)
+
+# --- (4) Visualization ---
+# Plot the rules
+plot(apriori_rules, method = "graph", engine = "htmlwidget")
+plot(fp_growth_rules, method = "graph", engine = "htmlwidget")
+
+# Compare unique rules
+unique_apriori <- as(lhs(apriori_rules), "list")
+unique_fp_growth <- as(lhs(fp_growth_rules), "list")
+
+print("Unique Rules in Apriori:")
+print(setdiff(unique_apriori, unique_fp_growth))
+
+print("Unique Rules in FP-Growth:")
+print(setdiff(unique_fp_growth, unique_apriori))

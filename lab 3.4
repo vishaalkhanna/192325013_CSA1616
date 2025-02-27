@@ -1,0 +1,55 @@
+# Install required packages if not installed
+if(!require(ggplot2)) install.packages("ggplot2", dependencies=TRUE)
+if(!require(readr)) install.packages("readr", dependencies=TRUE)
+if(!require(caret)) install.packages("caret", dependencies=TRUE)
+
+library(ggplot2)
+library(readr)
+library(caret)
+
+# ---- Load Diabetes Dataset ----
+# Set working directory or provide full path to the file
+data <- read.csv("diabetes.csv")
+
+# Inspect the dataset
+str(data)
+summary(data)
+
+# ---- Linear Regression: Age vs Diabetes Outcome ----
+# Assuming 'Outcome' is the diabetes indicator (1 = Yes, 0 = No)
+linear_model <- lm(Outcome ~ Age, data=data)
+summary(linear_model)
+
+# Visualizing the Linear Relationship
+ggplot(data, aes(x = Age, y = Outcome)) +
+  geom_point(color="blue", alpha=0.5) +
+  geom_smooth(method="lm", color="red") +
+  labs(title="Diabetes Trend by Age", x="Age", y="Diabetes Outcome")
+
+# ---- Multiple Regression: Age, BMI, Glucose vs Diabetes ----
+multiple_model <- lm(Outcome ~ Age + BMI + Glucose, data=data)
+summary(multiple_model)
+
+# ---- Predictions & Model Evaluation ----
+# Splitting data into Training & Testing (80%-20%)
+set.seed(123)
+train_indices <- createDataPartition(data$Outcome, p = 0.8, list = FALSE)
+train_data <- data[train_indices, ]
+test_data <- data[-train_indices, ]
+
+# Train the model
+final_model <- lm(Outcome ~ Age + BMI + Glucose, data=train_data)
+
+# Predict on test data
+predictions <- predict(final_model, test_data)
+
+# Convert predictions to binary (0 or 1)
+predicted_classes <- ifelse(predictions > 0.5, 1, 0)
+
+# Compute confusion matrix
+conf_matrix <- table(Predicted = predicted_classes, Actual = test_data$Outcome)
+print(conf_matrix)
+
+# Calculate Accuracy
+accuracy <- sum(diag(conf_matrix)) / sum(conf_matrix)
+cat("Model Accuracy:", accuracy * 100, "%\n")
